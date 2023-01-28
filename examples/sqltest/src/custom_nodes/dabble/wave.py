@@ -5,14 +5,33 @@ Custom node to show keypoints and count the number of times the person's hand is
 from typing import Any, Dict, List, Tuple
 import cv2
 from peekingduck.pipeline.nodes.abstract_node import AbstractNode
+import math
 
 # setup global constants
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)  # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
+YELLOW = (0, 255, 0)
 THRESHOLD = 0.6  # ignore keypoints below this threshold
-KP_RIGHT_SHOULDER = 6  # PoseNet's skeletal keypoints
+plank_threshold = 150
+
+KP_NOSE = 0
+KP_LEFT_EYE = 1
+KP_RIGHT_EYE = 2
+KP_LEFT_EAR = 3
+KP_RIGHT_EAR = 4
+KP_LEFT_SHOULDER = 5
+KP_RIGHT_SHOULDER = 6
+KP_LEFT_ELBOW = 7
+KP_RIGHT_ELBOW = 8
+KP_LEFT_WRIST = 9
 KP_RIGHT_WRIST = 10
+KP_LEFT_HIP = 11
+KP_RIGHT_HIP = 12
+KP_LEFT_KNEE = 13
+KP_RIGHT_KNEE = 14
+KP_LEFT_ANKLE = 15
+KP_RIGHT_ANKLE = 16
 
 
 def map_bbox_to_image_coords(
@@ -91,6 +110,10 @@ class Node(AbstractNode):
         self.num_direction_changes = 0
         self.num_waves = 0
 
+    def __getDistance(self, p1, p2):
+        print(p1, p2)
+        return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
         """This node draws keypoints and count hand waves.
 
@@ -111,82 +134,78 @@ class Node(AbstractNode):
 
         img_size = (img.shape[1], img.shape[0])  # image width, height
 
-        # get bounding box confidence score and draw it at the
-        # left-bottom (x1, y2) corner of the bounding box (offset by 30 pixels)
-        the_bbox = bboxes[0]  # image only has one person
-        the_bbox_score = bbox_scores[0]  # only one set of scores
+        if len(bboxes) and len(bbox_scores):
+            the_bbox = bboxes[0]  # image only has one person
+            the_bbox_score = bbox_scores[0]  # only one set of scores
 
-        x1, y1, x2, y2 = map_bbox_to_image_coords(the_bbox, img_size)
-        score_str = f"BBox {the_bbox_score:0.2f}"
-        cv2.putText(
-            img=img,
-            text=score_str,
-            org=(x1, y2 - 30),  # offset by 30 pixels
-            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=1.0,
-            color=WHITE,
-            thickness=3,
-        )
+            x1, y1, x2, y2 = map_bbox_to_image_coords(the_bbox, img_size)
+            score_str = f"BBox {the_bbox_score:0.2f}"
+            cv2.putText(
+                img=img,
+                text=score_str,
+                org=(x1, y2 - 30),  # offset by 30 pixels
+                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=1.0,
+                color=WHITE,
+                thickness=3,
+            )
 
-        # hand wave detection using a simple heuristic of tracking the
-        # right wrist movement
-        the_keypoints = keypoints[0]  # image only has one person
-        the_keypoint_scores = keypoint_scores[0]  # only one set of scores
-        right_wrist = None
-        right_shoulder = None
+            # assume either left facing or right facing
+            the_keypoints = keypoints[0]  # image only has one person
+            the_keypoint_scores = keypoint_scores[0]  # only one set of scores
+            elbow = None
+            wrist = None
+            shoulder = None
+            hip = None
+            knee = None
+            ankle = None
 
-        for i, keypoints in enumerate(the_keypoints):
-            keypoint_score = the_keypoint_scores[i]
+            for i, keypoints in enumerate(the_keypoints):
+                keypoint_score = the_keypoint_scores[i]
+                if keypoint_score >= THRESHOLD:
+                    x, y = map_keypoint_to_image_coords(keypoints.tolist(), img_size)
+                    x_y_str = f"({x}, {y})"
 
-            if keypoint_score >= THRESHOLD:
-                x, y = map_keypoint_to_image_coords(keypoints.tolist(), img_size)
-                x_y_str = f"({x}, {y})"
+                    if i == KP_LEFT_SHOULDER:
+                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
+                            shoulder = keypoints
 
-                if i == KP_RIGHT_SHOULDER:
-                    right_shoulder = keypoints
-                    the_color = YELLOW
-                elif i == KP_RIGHT_WRIST:
-                    right_wrist = keypoints
-                    the_color = YELLOW
-                else:  # generic keypoint
-                    the_color = WHITE
+                        else:
+                            shoulder = keypoints
 
-                draw_text(img, x, y, x_y_str, the_color)
+                    elif i == KP_LEFT_ANKLE:
+                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
+                            ankle = keypoints
 
-        if right_wrist is not None and right_shoulder is not None:
-            # only count number of hand waves after we have gotten the
-            # skeletal poses for the right wrist and right shoulder
-            if self.right_wrist is None:
-                self.right_wrist = right_wrist  # first wrist data point
+                        else:
+                            ankle = keypoints
+
+                    elif i == KP_LEFT_KNEE:
+                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
+                            knee = keypoints
+
+                        else:
+                            elbow = keypoints
+
+                    elif i == KP_LEFT_HIP:
+                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
+                            hip = keypoints
+
+                        else:
+                            hip = keypoints
+
+                    draw_text(img, x, y, x_y_str, YELLOW)
+
+            if ankle is not None and shoulder is not None and hip is not None and knee is not None:
+                print(ankle, hip, knee, shoulder)
+                if self.__getDistance(hip, knee) < plank_threshold and self.__getDistance(knee,
+                                                                                          ankle) < plank_threshold:
+                    print("Plank detected!")
             else:
-                # wait for wrist to be above shoulder to count hand wave
-                if right_wrist[1] > right_shoulder[1]:
-                    pass
-                else:
-                    if right_wrist[0] < self.right_wrist[0]:
-                        direction = "left"
-                    else:
-                        direction = "right"
-
-                    if self.direction is None:
-                        self.direction = direction  # first direction data point
-                    else:
-                        # check if hand changes direction
-                        if direction != self.direction:
-                            self.num_direction_changes += 1
-                        # every two hand direction changes == one wave
-                        if self.num_direction_changes >= 2:
-                            self.num_waves += 1
-                            self.num_direction_changes = 0  # reset direction count
-
-                    self.right_wrist = right_wrist  # save last position
-                    self.direction = direction
-
-            wave_str = f"#waves = {self.num_waves}"
-            draw_text(img, 20, 30, wave_str, YELLOW)
-
+                print("not a plank")
+        else:
+            print("no one detected")
         return {
             "hand_direction": self.direction if self.direction is not None else "None",
             "num_waves": self.num_waves,
         }
-

@@ -1,6 +1,6 @@
 nodes:
 - input.visual:
-    source: "https://storage.googleapis.com/peekingduck/videos/wave.mp4"
+    source: "test_data/plank.mp4"
 - model.yolo
 - model.posenet
 - dabble.fps
