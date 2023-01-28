@@ -1,0 +1,2 @@
+input: ["hand_direction", "num_waves"]
+output: ["none"]

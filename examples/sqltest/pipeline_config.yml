@@ -1,0 +1,12 @@
+nodes:
+- input.visual:
+    source: "https://storage.googleapis.com/peekingduck/videos/wave.mp4"
+- model.yolo
+- model.posenet
+- dabble.fps
+- custom_nodes.dabble.wave
+- draw.poses
+- draw.legend:
+    show: ["fps"]
+- output.screen
+- custom_nodes.output.sqlite

@@ -1,0 +1,10 @@
+nodes:
+- input.visual:
+    source: large_crowd.mp4
+- model.csrnet:
+    model_type: dense
+- draw.heat_map
+- draw.legend:
+    show: ["count"]
+- output.csv_writer
+    stats_to_track: []
