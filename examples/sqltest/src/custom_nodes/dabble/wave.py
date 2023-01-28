@@ -12,8 +12,8 @@ FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)  # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
 YELLOW = (0, 255, 0)
-THRESHOLD = 0.6  # ignore keypoints below this threshold
-plank_threshold = 150
+THRESHOLD = 0.3 # ignore keypoints below this threshold
+plank_threshold = 100
 
 KP_NOSE = 0
 KP_LEFT_EYE = 1
@@ -114,6 +114,16 @@ class Node(AbstractNode):
         print(p1, p2)
         return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
+    def __getHighestProbability(self, keypoints, keypoint_scores):
+        highest = 0
+        for i in range(len(keypoint_scores)):
+            if keypoint_scores[i] > highest:
+                highest = keypoint_scores[i]
+                index = i
+        if highest > THRESHOLD:
+            return keypoints[index]
+        else:
+            return None
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
         """This node draws keypoints and count hand waves.
 
@@ -126,6 +136,7 @@ class Node(AbstractNode):
         """
 
         # get required inputs from pipeline
+        info_str = ""
         img = inputs["img"]
         bboxes = inputs["bboxes"]
         bbox_scores = inputs["bbox_scores"]
@@ -153,59 +164,49 @@ class Node(AbstractNode):
             # assume either left facing or right facing
             the_keypoints = keypoints[0]  # image only has one person
             the_keypoint_scores = keypoint_scores[0]  # only one set of scores
-            elbow = None
-            wrist = None
-            shoulder = None
-            hip = None
-            knee = None
-            ankle = None
+
+            ankle = self.__getHighestProbability(the_keypoints[KP_LEFT_ANKLE:KP_RIGHT_ANKLE], the_keypoint_scores[KP_LEFT_ANKLE:KP_RIGHT_ANKLE])
+            knee = self.__getHighestProbability(the_keypoints[KP_LEFT_KNEE:KP_RIGHT_KNEE], the_keypoint_scores[KP_LEFT_KNEE:KP_RIGHT_KNEE])
+            hip = self.__getHighestProbability(the_keypoints[KP_LEFT_HIP:KP_RIGHT_HIP], the_keypoint_scores[KP_LEFT_HIP:KP_RIGHT_HIP])
+            shoulder = self.__getHighestProbability(the_keypoints[KP_LEFT_SHOULDER:KP_RIGHT_SHOULDER], the_keypoint_scores[KP_LEFT_SHOULDER:KP_RIGHT_SHOULDER])
+            wrist = self.__getHighestProbability(the_keypoints[KP_LEFT_WRIST:KP_RIGHT_WRIST], the_keypoint_scores[KP_LEFT_WRIST:KP_RIGHT_WRIST])
+            elbow = self.__getHighestProbability(the_keypoints[KP_LEFT_ELBOW:KP_RIGHT_ELBOW], the_keypoint_scores[KP_LEFT_ELBOW:KP_RIGHT_ELBOW])
+
 
             for i, keypoints in enumerate(the_keypoints):
                 keypoint_score = the_keypoint_scores[i]
                 if keypoint_score >= THRESHOLD:
                     x, y = map_keypoint_to_image_coords(keypoints.tolist(), img_size)
                     x_y_str = f"({x}, {y})"
-
-                    if i == KP_LEFT_SHOULDER:
-                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
-                            shoulder = keypoints
-
-                        else:
-                            shoulder = keypoints
-
-                    elif i == KP_LEFT_ANKLE:
-                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
-                            ankle = keypoints
-
-                        else:
-                            ankle = keypoints
-
-                    elif i == KP_LEFT_KNEE:
-                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
-                            knee = keypoints
-
-                        else:
-                            elbow = keypoints
-
-                    elif i == KP_LEFT_HIP:
-                        if the_keypoint_scores[i] > the_keypoint_scores[i + 1]:
-                            hip = keypoints
-
-                        else:
-                            hip = keypoints
-
                     draw_text(img, x, y, x_y_str, YELLOW)
 
+            print(ankle, hip, knee, shoulder)
             if ankle is not None and shoulder is not None and hip is not None and knee is not None:
-                print(ankle, hip, knee, shoulder)
-                if self.__getDistance(hip, knee) < plank_threshold and self.__getDistance(knee,
-                                                                                          ankle) < plank_threshold:
-                    print("Plank detected!")
+                if self.__getDistance(hip, knee) < plank_threshold and self.__getDistance(knee, ankle) < plank_threshold:
+                    info_str += "Plank detected!"
+                else:
+                    info_str += "Not Plank"
             else:
-                print("not a plank")
+                info_str += "Incomplete detection: "
+                if ankle is None:
+                    info_str += "Ankle "
+                if hip is None:
+                    info_str += "Hip "
+                if knee is None:
+                    info_str += "Knee "
+                if shoulder is None:
+                    info_str += "Shoulder "
         else:
-            print("no one detected")
+            info_str += "No one detected"
+        # cv2.putText(
+        #     img=img,
+        #     text=info_str,
+        #     org=(x1, y2 - 60),  # offset by 30 pixels
+        #     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+        #     fontScale=1.0,
+        #     color=WHITE,
+        #     thickness=3,
+        # )
         return {
-            "hand_direction": self.direction if self.direction is not None else "None",
-            "num_waves": self.num_waves,
+            "plank_info": info_str
         }

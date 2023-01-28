@@ -7,6 +7,6 @@ nodes:
 - custom_nodes.dabble.wave
 - draw.poses
 - draw.legend:
-    show: ["fps"]
+    show: ["fps", "plank_info"]
 - output.screen
-- custom_nodes.output.sqlite
+#- custom_nodes.output.sqlite

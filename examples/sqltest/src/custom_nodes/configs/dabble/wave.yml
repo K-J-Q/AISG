@@ -1,2 +1,2 @@
 input: ["img", "bboxes", "bbox_scores", "keypoints", "keypoint_scores"]
-output: ["hand_direction", "num_waves"]
+output: ["plank_info"]
