@@ -9,4 +9,4 @@ nodes:
 - draw.legend:
     show: ["fps", "plank_info"]
 - output.screen
-#- custom_nodes.output.sqlite
+- custom_nodes.output.sqlite

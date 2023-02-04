@@ -1,2 +1,2 @@
-input: ["hand_direction", "num_waves"]
+input: ["plank_info"]
 output: ["none"]

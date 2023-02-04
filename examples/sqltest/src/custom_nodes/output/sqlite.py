@@ -28,24 +28,23 @@ class Node(AbstractNode):
             self.logger.info(f"Connected to {DB_FILE}")
             sql = """ CREATE TABLE IF NOT EXISTS wavetable (
                         datetime text,
-                        hand_direction text,
-                        wave_count integer
+                        is_plank text
                    ); """
             cur = self.conn.cursor()
             cur.execute(sql)
         except sqlite3.Error as e:
             self.logger.info(f"SQL Error: {e}")
 
-    def update_db(self, hand_direction: str, num_waves: int) -> None:
+    def update_db(self, is_plank:bool) -> None:
         """Helper function to save current time stamp, hand direction and
         wave count into DB wavetable.
         """
         now = datetime.now()
         dt_str = f"{now:%Y-%m-%d %H:%M:%S}"
-        sql = """ INSERT INTO wavetable(datetime,hand_direction,wave_count)
-                values (?,?,?) """
+        sql = """ INSERT INTO wavetable(datetime, is_plank)
+                values (?,?) """
         cur = self.conn.cursor()
-        cur.execute(sql, (dt_str, hand_direction, num_waves))
+        cur.execute(sql, (dt_str, is_plank))
         self.conn.commit()
 
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
@@ -58,8 +57,12 @@ class Node(AbstractNode):
               outputs (dict): Empty dictionary
         """
 
-        hand_direction = inputs["hand_direction"]
-        num_waves = inputs["num_waves"]
-        self.update_db(hand_direction, num_waves)
+        plank_info = inputs["plank_info"]
+        if plank_info == "Plank detected!":
+            is_plank = True
+        else:
+            is_plank = False
+            
+        self.update_db(is_plank)
 
         return {}
