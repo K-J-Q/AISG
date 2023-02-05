@@ -12,7 +12,7 @@ FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)  # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
 THRESHOLD = 0.02 # ignore keypoints below this threshold
-plank_threshold = 0.008
+plank_threshold = 0.05
 
 KP_NOSE = 0
 KP_LEFT_EYE = 1
@@ -173,7 +173,7 @@ class Node(AbstractNode):
                 print(max(self.__getDistance(shoulder, hip)*height, self.__getDistance(hip, knee)*height, self.__getDistance(knee, ankle)*height))
                 if self.__getDistance(head, ankle, axis="x")/self.__getDistance(head, ankle, axis="y") > 2 and self.__getDistance(shoulder, hip)*height<plank_threshold  and self.__getDistance(hip, knee)*height < plank_threshold and self.__getDistance(knee, ankle)*height < plank_threshold:
                     info_str += "Plank detected!"
-                    self.time_seconds += (time.time_ns() - self.last_time)/1000000000*0.4
+                    self.time_seconds += (time.time_ns() - self.last_time)/1000000000*0.7
 
                 else:
                     info_str += "Not Plank:"

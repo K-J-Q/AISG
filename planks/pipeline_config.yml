@@ -1,6 +1,6 @@
 nodes:
 - input.visual:
-    source: "test_data/plank 2.mp4"
+    source: "test_data/plank.mp4"
 - model.posenet:
     score_threshold: 0.2
 - dabble.fps
@@ -8,5 +8,6 @@ nodes:
 - draw.poses
 - draw.legend:
     show: ["fps", "plank_info", "cumilated_time"]
-- output.screen
+- output.media_writer:
+    output_dir: "output"
 - custom_nodes.output.sqlite
