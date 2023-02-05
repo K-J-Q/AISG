@@ -1,0 +1,2 @@
+input: ["img", "keypoints", "keypoint_scores", "fps"]
+output: ["plank_info", "cumilated_time"]

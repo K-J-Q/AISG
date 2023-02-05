@@ -1,2 +1,2 @@
-input: ["plank_info"]
+input: ["plank_info", "cumilated_time"]
 output: ["none"]
