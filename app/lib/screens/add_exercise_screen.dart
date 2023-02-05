@@ -79,7 +79,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   @override
   Widget build(BuildContext context) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String _exercisePath = "";
+    String _exercisePath = "images/plank 2.gif";
     final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
 
@@ -97,16 +97,6 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                         stopTimer(resets: false);
                       } else {
                         startTimer(resets: false);
-                        print(_selectedExercise?.id);
-                        setState(() {
-                          if (_selectedExercise?.id == "ru_5") {
-                            _exercisePath = "images/pushup.gif";
-                          } else if (_selectedExercise?.id == "ru_4") {
-                            _exercisePath = "images/planks.gif";
-                          } else {
-                            _exercisePath = "";
-                          }
-                        });
                       }
                     },
                     child: Text(
