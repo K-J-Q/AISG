@@ -27,6 +27,7 @@ class Node(AbstractNode):
          self.conn = sqlite3.connect(DB_FILE)
          self.logger.info(f"Connected to {DB_FILE}")
          sql = """ CREATE TABLE IF NOT EXISTS pushuptable (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                         datetime text,
                         ear_direction text,
                         pushup_count integer
@@ -42,11 +43,23 @@ class Node(AbstractNode):
       """
       now = datetime.now()
       dt_str = f"{now:%Y-%m-%d %H:%M:%S}"
-      sql = """ INSERT INTO pushuptable(datetime,ear_direction,pushup_count)
-                values (?,?,?) """
+      sql = "SELECT COUNT(*) FROM pushuptable;"
       cur = self.conn.cursor()
-      cur.execute(sql, (dt_str, ear_direction, num_pushup))
+      cur.execute(sql)
       self.conn.commit()
+      result = cur.fetchone()
+      row_count = result[0]
+      if row_count == 1:
+        sql = "UPDATE pushuptable SET `datetime` = '{}', ear_direction = '{}', pushup_count = '{}' WHERE id = 1;".format(dt_str, ear_direction, num_pushup)
+        cur = self.conn.cursor()
+        cur.execute(sql)
+        self.conn.commit()
+      else:
+        sql = """ INSERT INTO pushuptable(datetime,ear_direction,pushup_count)
+                    values (?,?,?) """
+        cur = self.conn.cursor()
+        cur.execute(sql, (dt_str, ear_direction, num_pushup))
+        self.conn.commit()
 
    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
       """Node to output push up data into sqlite database.

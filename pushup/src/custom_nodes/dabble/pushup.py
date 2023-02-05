@@ -17,29 +17,6 @@ KP_left_ear = 3
 KP_right_ear = 4
 
 
-def map_bbox_to_image_coords(
-   bbox: List[float], image_size: Tuple[int, int]
-) -> List[int]:
-   """First helper function to convert relative bounding box coordinates to
-   absolute image coordinates.
-   Bounding box coords ranges from 0 to 1
-   where (0, 0) = image top-left, (1, 1) = image bottom-right.
-
-   Args:
-      bbox (List[float]): List of 4 floats x1, y1, x2, y2
-      image_size (Tuple[int, int]): Width, Height of image
-
-   Returns:
-      List[int]: x1, y1, x2, y2 in integer image coords
-   """
-   width, height = image_size[0], image_size[1]
-   x1, y1, x2, y2 = bbox
-   x1 *= width
-   x2 *= width
-   y1 *= height
-   y2 *= height
-   return int(x1), int(y1), int(x2), int(y2)
-
 
 def map_keypoint_to_image_coords(
    keypoint: List[float], image_size: Tuple[int, int]
@@ -100,7 +77,7 @@ class Node(AbstractNode):
 
       Args:
             inputs (dict): Dictionary with keys
-               "img", "bboxes", "bbox_scores", "keypoints", "keypoint_scores".
+               "img", "keypoints", "keypoint_scores".
 
       Returns:
             outputs (dict): Empty dictionary.
@@ -108,29 +85,10 @@ class Node(AbstractNode):
 
       # get required inputs from pipeline
       img = inputs["img"]
-      bboxes = inputs["bboxes"]
-      bbox_scores = inputs["bbox_scores"]
       keypoints = inputs["keypoints"]
       keypoint_scores = inputs["keypoint_scores"]
 
       img_size = (img.shape[1], img.shape[0])  # image width, height
-
-      # get bounding box confidence score and draw it at the
-      # left-bottom (x1, y2) corner of the bounding box (offset by 30 pixels)
-      the_bbox = bboxes[0]             # image only has one person
-      the_bbox_score = bbox_scores[0]  # only one set of scores
-
-      x1, y1, x2, y2 = map_bbox_to_image_coords(the_bbox, img_size)
-      score_str = f"BBox {the_bbox_score:0.2f}"
-    #   cv2.putText(
-    #      img=img,
-    #      text=score_str,
-    #      org=(x1, y2 - 30),            # offset by 30 pixels
-    #      fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    #      fontScale=0.6,
-    #      color=WHITE,
-    #      thickness=3,
-    #   )
 
       # push up detection using a simple heuristic of tracking the ear
       the_keypoints = keypoints[0]              # image only has one person

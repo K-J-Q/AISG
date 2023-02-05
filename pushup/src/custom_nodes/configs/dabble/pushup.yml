@@ -1,5 +1,5 @@
 # Dabble node has both input and output
-input: ["img", "bboxes", "bbox_scores", "keypoints", "keypoint_scores"]
+input: ["img", "keypoints", "keypoint_scores"]
 output: ["ear_direction", "num_pushup"]
 
 # No optional configs
