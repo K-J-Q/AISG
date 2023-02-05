@@ -1,2 +1,2 @@
-input: ["img", "bboxes", "bbox_scores", "keypoints", "keypoint_scores"]
+input: ["img", "keypoints", "keypoint_scores"]
 output: ["plank_info"]

@@ -1,8 +1,9 @@
 nodes:
 - input.visual:
-    source: "test_data/plank.mp4"
+    source: "test_data/plank 2.mp4"
 - model.yolo
-- model.posenet
+- model.posenet:
+    score_threshold: 0.2
 - dabble.fps
 - custom_nodes.dabble.wave
 - draw.poses

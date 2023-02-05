@@ -11,8 +11,8 @@ import math
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)  # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
-THRESHOLD = 0.2 # ignore keypoints below this threshold
-plank_threshold = 0.3
+THRESHOLD = 0.1 # ignore keypoints below this threshold
+plank_threshold = 0.1
 
 KP_NOSE = 0
 KP_LEFT_EYE = 1
@@ -109,8 +109,11 @@ class Node(AbstractNode):
         self.num_direction_changes = 0
         self.num_waves = 0
 
-    def __getDistance(self, p1, p2):
-        return abs(p1[1] - p2[1])
+    def __getDistance(self, p1, p2, axis = "y"):
+        if axis == "x":
+            return abs(p1[0] - p2[0])
+        else:
+            return abs(p1[1] - p2[1])
 
     def __getHighestProbability(self, keypoints, keypoint_scores):
         highest = 0
@@ -118,6 +121,7 @@ class Node(AbstractNode):
             if keypoint_scores[i] > highest:
                 highest = keypoint_scores[i]
                 index = i
+        print(highest)
         if highest > THRESHOLD:
             return keypoints[index]
         else:
@@ -136,29 +140,12 @@ class Node(AbstractNode):
         # get required inputs from pipeline
         info_str = ""
         img = inputs["img"]
-        bboxes = inputs["bboxes"]
-        bbox_scores = inputs["bbox_scores"]
         keypoints = inputs["keypoints"]
         keypoint_scores = inputs["keypoint_scores"]
 
         img_size = (img.shape[1], img.shape[0])  # image width, height
 
-        if len(bboxes) and len(bbox_scores):
-            the_bbox = bboxes[0]  # image only has one person
-            the_bbox_score = bbox_scores[0]  # only one set of scores
-
-            # x1, y1, x2, y2 = map_bbox_to_image_coords(the_bbox, img_size)
-            # score_str = f"BBox {the_bbox_score:0.2f}"
-            # cv2.putText(
-            #     img=img,
-            #     text=score_str,
-            #     org=(x1, y2 - 30),  # offset by 30 pixels
-            #     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            #     fontScale=1.0,
-            #     color=WHITE,
-            #     thickness=3,
-            # )
-
+        if len(keypoints) and len(keypoint_scores):
             # assume either left facing or right facing
             the_keypoints = keypoints[0]  # image only has one person
             the_keypoint_scores = keypoint_scores[0]  # only one set of scores
@@ -169,7 +156,8 @@ class Node(AbstractNode):
             shoulder = self.__getHighestProbability(the_keypoints[KP_LEFT_SHOULDER:KP_RIGHT_SHOULDER], the_keypoint_scores[KP_LEFT_SHOULDER:KP_RIGHT_SHOULDER])
             wrist = self.__getHighestProbability(the_keypoints[KP_LEFT_WRIST:KP_RIGHT_WRIST], the_keypoint_scores[KP_LEFT_WRIST:KP_RIGHT_WRIST])
             elbow = self.__getHighestProbability(the_keypoints[KP_LEFT_ELBOW:KP_RIGHT_ELBOW], the_keypoint_scores[KP_LEFT_ELBOW:KP_RIGHT_ELBOW])
-
+            head = self.__getHighestProbability(the_keypoints[KP_LEFT_EYE:KP_RIGHT_EYE], the_keypoint_scores[KP_LEFT_EYE:KP_RIGHT_EYE])
+            
 
             for i, keypoints in enumerate(the_keypoints):
                 keypoint_score = the_keypoint_scores[i]
@@ -179,18 +167,22 @@ class Node(AbstractNode):
                     draw_text(img, x, y, x_y_str, YELLOW)
 
 
-            if ankle is not None and shoulder is not None and hip is not None and knee is not None:
-                print(self.__getDistance(shoulder, hip), self.__getDistance(hip, knee), self.__getDistance(knee, ankle))
-                if self.__getDistance(shoulder, hip)<plank_threshold  and self.__getDistance(hip, knee) < plank_threshold and self.__getDistance(knee, ankle) < plank_threshold:
+            if head is not None and ankle is not None and shoulder is not None and hip is not None and knee is not None:
+                height = self.__getDistance(head, ankle)
+                print(self.__getDistance(shoulder, hip)*height, self.__getDistance(hip, knee)*height, self.__getDistance(knee, ankle)*height)
+                if self.__getDistance(head, ankle, axis="x")/self.__getDistance(head, ankle, axis="y") > 2 and self.__getDistance(shoulder, hip)*height<plank_threshold  and self.__getDistance(hip, knee)*height < plank_threshold and self.__getDistance(knee, ankle)*height < plank_threshold:
                     info_str += "Plank detected!"
                 else:
                     info_str += "Not Plank:"
-                    if self.__getDistance(shoulder, hip) > plank_threshold:
+                    if self.__getDistance(head, ankle, axis="x")/self.__getDistance(head, ankle, axis="y") <= 2:
+                        info_str += " Move closer/go to plank position"
+                    if self.__getDistance(shoulder, hip)*height >= plank_threshold:
                         info_str += " Adjust shoulder and hip"
-                    if self.__getDistance(hip, knee) > plank_threshold:
+                    if self.__getDistance(hip, knee)*height >= plank_threshold:
                         info_str += " Adjust hip and knee"
-                    if self.__getDistance(knee, ankle) > plank_threshold:
+                    if self.__getDistance(knee, ankle)*height >= plank_threshold:
                         info_str += " Adjust knee and ankle"
+                    
             else:
                 info_str += "Incomplete detection: "
                 if ankle is None:
@@ -203,15 +195,6 @@ class Node(AbstractNode):
                     info_str += "Shoulder "
         else:
             info_str += "No one detected"
-        # cv2.putText(
-        #     img=img,
-        #     text=info_str,
-        #     org=(x1, y2 - 60),  # offset by 30 pixels
-        #     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-        #     fontScale=1.0,
-        #     color=WHITE,
-        #     thickness=3,
-        # )
         return {
             "plank_info": info_str
         }
