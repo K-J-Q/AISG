@@ -1,18 +1,18 @@
 """
-Custom node to show keypoints and count the number of times the person's hand is waved
+Custom node to show keypoints and count the planking seconds
 """
 
 from typing import Any, Dict, List, Tuple
 import cv2
 from peekingduck.pipeline.nodes.abstract_node import AbstractNode
 import math
-
+import time
 # setup global constants
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)  # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
-THRESHOLD = 0.1 # ignore keypoints below this threshold
-plank_threshold = 0.1
+THRESHOLD = 0.02 # ignore keypoints below this threshold
+plank_threshold = 0.008
 
 KP_NOSE = 0
 KP_LEFT_EYE = 1
@@ -108,6 +108,8 @@ class Node(AbstractNode):
         self.direction = None
         self.num_direction_changes = 0
         self.num_waves = 0
+        self.time_seconds = 0
+        self.last_time = time.time_ns()
 
     def __getDistance(self, p1, p2, axis = "y"):
         if axis == "x":
@@ -121,7 +123,6 @@ class Node(AbstractNode):
             if keypoint_scores[i] > highest:
                 highest = keypoint_scores[i]
                 index = i
-        print(highest)
         if highest > THRESHOLD:
             return keypoints[index]
         else:
@@ -169,9 +170,11 @@ class Node(AbstractNode):
 
             if head is not None and ankle is not None and shoulder is not None and hip is not None and knee is not None:
                 height = self.__getDistance(head, ankle)
-                print(self.__getDistance(shoulder, hip)*height, self.__getDistance(hip, knee)*height, self.__getDistance(knee, ankle)*height)
+                print(max(self.__getDistance(shoulder, hip)*height, self.__getDistance(hip, knee)*height, self.__getDistance(knee, ankle)*height))
                 if self.__getDistance(head, ankle, axis="x")/self.__getDistance(head, ankle, axis="y") > 2 and self.__getDistance(shoulder, hip)*height<plank_threshold  and self.__getDistance(hip, knee)*height < plank_threshold and self.__getDistance(knee, ankle)*height < plank_threshold:
                     info_str += "Plank detected!"
+                    self.time_seconds += (time.time_ns() - self.last_time)/1000000000*0.4
+
                 else:
                     info_str += "Not Plank:"
                     if self.__getDistance(head, ankle, axis="x")/self.__getDistance(head, ankle, axis="y") <= 2:
@@ -195,6 +198,8 @@ class Node(AbstractNode):
                     info_str += "Shoulder "
         else:
             info_str += "No one detected"
+        self.last_time = time.time_ns()
         return {
-            "plank_info": info_str
+            "plank_info": info_str,
+            "cumilated_time": self.time_seconds
         }

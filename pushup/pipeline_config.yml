@@ -1,0 +1,15 @@
+nodes:
+- input.visual:
+    # source: https://storage.googleapis.com/peekingduck/videos/wave.mp4
+    source: pushup.mp4
+- model.yolox
+- model.posenet
+- draw.poses   
+- dabble.fps
+- custom_nodes.dabble.pushup
+- draw.legend:
+    show: ["fps"]
+- output.screen
+- custom_nodes.output.sqlite
+# - output.media_writer:
+#     output_dir: C:\Users\hwadr\pushup\save

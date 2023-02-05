@@ -4,9 +4,9 @@ nodes:
 - model.posenet:
     score_threshold: 0.2
 - dabble.fps
-- custom_nodes.dabble.wave
+- custom_nodes.dabble.planks
 - draw.poses
 - draw.legend:
-    show: ["fps", "plank_info"]
+    show: ["fps", "plank_info", "cumilated_time"]
 - output.screen
 - custom_nodes.output.sqlite
