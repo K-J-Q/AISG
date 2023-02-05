@@ -1,7 +1,6 @@
 nodes:
 - input.visual:
     source: "test_data/plank 2.mp4"
-- model.yolo
 - model.posenet:
     score_threshold: 0.2
 - dabble.fps
