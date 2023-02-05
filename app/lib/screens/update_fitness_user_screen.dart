@@ -96,14 +96,15 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     children: [
                       Container(
                         height: 150,
-                        width: MediaQuery.of(context).size.width/2 - 40,
+                        width: MediaQuery.of(context).size.width / 2 - 40,
                         padding: EdgeInsets.all(2),
                         margin: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(20)),
                             border: gendermale
                                 ? Border.all(color: Colors.black, width: 2)
-                                : Border.all(color: Colors.grey.shade300, width: 2)),
+                                : Border.all(
+                                    color: Colors.grey.shade300, width: 2)),
                         child: TextButton(
                           onPressed: () {
                             _toggleGender();
@@ -118,7 +119,7 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                                   Icons.male,
                                   size: 60,
                                   color:
-                                  gendermale ? Colors.amber : Colors.black,
+                                      gendermale ? Colors.amber : Colors.black,
                                 ),
                                 Text('Male',
                                     style: TextStyle(
@@ -134,13 +135,14 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       ),
                       Container(
                         height: 150,
-                        width: MediaQuery.of(context).size.width/2 - 40,
+                        width: MediaQuery.of(context).size.width / 2 - 40,
                         padding: EdgeInsets.all(2),
                         margin: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           border: gendermale
-                              ? Border.all(color: Colors.grey.shade300, width: 2)
+                              ? Border.all(
+                                  color: Colors.grey.shade300, width: 2)
                               : Border.all(color: Colors.black, width: 2),
                         ),
                         child: TextButton(
@@ -161,7 +163,7 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                                 'Female',
                                 style: TextStyle(
                                   color:
-                                  gendermale ? Colors.black : Colors.pink,
+                                      gendermale ? Colors.black : Colors.pink,
                                   fontSize: 20,
                                 ),
                               ),
@@ -180,13 +182,17 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                         color: Colors.white,
-                        border: Border.all(color: Colors.grey.shade300, width: 2)
-                    ),
+                        border:
+                            Border.all(color: Colors.grey.shade300, width: 2)),
                     child: Column(
                       children: [
                         Column(
                           children: [
-                            Text("Age", style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                            Text(
+                              "Age",
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
                             TextField(
                               textAlign: TextAlign.center,
                               controller: ageController,
@@ -201,15 +207,16 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height: ((MediaQuery.of(context).size.width / 2) - 50) * 1.3,
+                        height: ((MediaQuery.of(context).size.width / 2) - 50) *
+                            1.3,
                         width: (MediaQuery.of(context).size.width / 2) - 40,
                         padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(left: 10,right: 10, top:10),
+                        margin: EdgeInsets.only(left: 10, right: 10, top: 10),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300, width: 2)
-                        ),
+                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                            color: Colors.white,
+                            border: Border.all(
+                                color: Colors.grey.shade300, width: 2)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -219,7 +226,9 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                                 Icon(Icons.height),
                                 Text(
                                   "Height",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
                                 )
                               ],
                             ),
@@ -252,12 +261,12 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                             1.3,
                         width: (MediaQuery.of(context).size.width / 2) - 40,
                         padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(left: 10,right: 10,top: 10),
+                        margin: EdgeInsets.only(left: 10, right: 10, top: 10),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                            borderRadius: BorderRadius.all(Radius.circular(15)),
                             color: Colors.white,
-                            border: Border.all(color: Colors.grey.shade300, width: 2)
-                        ),
+                            border: Border.all(
+                                color: Colors.grey.shade300, width: 2)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -267,7 +276,9 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                                 Icon(Icons.face),
                                 Text(
                                   " Weight",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
                                 )
                               ],
                             ),
@@ -308,19 +319,20 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                         color: Colors.white,
-                        border: Border.all(color: Colors.grey.shade300, width: 2)
-                    ),
+                        border:
+                            Border.all(color: Colors.grey.shade300, width: 2)),
                     child: Column(
                       children: [
                         Text(
                           'Activity level',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         DropdownButton(
                           onChanged: (String? newValue) {
                             setState(() {
                               activityLevel = newValue!;
-                              fitnessUser.activityLevel = newValue!;
+                              fitnessUser.activityLevel = newValue;
                               FirebaseCalls().updateFitnessUser(fitnessUser);
                             });
                           },
@@ -354,8 +366,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                         color: Colors.white,
-                        border: Border.all(color: Colors.grey.shade300, width: 2)
-                    ),
+                        border:
+                            Border.all(color: Colors.grey.shade300, width: 2)),
                     child: Column(
                       children: [
                         Text(

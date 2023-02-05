@@ -70,24 +70,16 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
   //TODO Shortlist your exercises
   final List<ExerciseType> _exercises = <ExerciseType>[
-    ExerciseType(id: 'ru_5', description: 'Running, 4 mph (13 min/mile)'),
-    ExerciseType(id: 'ru_6', description: 'Running, 5 mph (12 min/mile)'),
-    ExerciseType(id: 'ru_7', description: 'Running, 5.2 mph (11.5 min/mile)'),
-    ExerciseType(id: 'ru_8', description: 'Running, 6 mph (10 min/mile)'),
-    ExerciseType(
-        id: 'bi_11', description: 'Cycling, 10-11.9 mph, light effort'),
-    ExerciseType(
-        id: 'bi_12', description: 'Cycling, 12-13.9 mph, moderate effort'),
-    ExerciseType(
-        id: 'bi_13', description: 'Cycling, 14-15.9 mph, vigorous effort'),
-    ExerciseType(id: 'sp_9', description: 'Basketball, shooting baskets'),
+    ExerciseType(id: 'ru_4', description: 'Plank'),
+    ExerciseType(id: 'ru_5', description: 'Push Up'),
+    ExerciseType(id: 'ru_6', description: 'Sit Up'),
   ];
 
   ExerciseType? _selectedExercise;
-
   @override
   Widget build(BuildContext context) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String _exercisePath = "";
     final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
 
@@ -105,6 +97,16 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                         stopTimer(resets: false);
                       } else {
                         startTimer(resets: false);
+                        print(_selectedExercise?.id);
+                        setState(() {
+                          if (_selectedExercise?.id == "ru_5") {
+                            _exercisePath = "images/pushup.gif";
+                          } else if (_selectedExercise?.id == "ru_4") {
+                            _exercisePath = "images/planks.gif";
+                          } else {
+                            _exercisePath = "";
+                          }
+                        });
                       }
                     },
                     child: Text(
@@ -172,6 +174,11 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               _selectedExercise = value!;
             });
           },
+        ),
+        Image(
+          image: AssetImage(_exercisePath),
+          width: double.infinity,
+          fit: BoxFit.cover,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
