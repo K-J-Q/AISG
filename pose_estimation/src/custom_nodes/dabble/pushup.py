@@ -1,5 +1,5 @@
 """
-Custom node to show keypoints and count the number of times the person's hand is waved
+Custom node to show keypoints and count the number of push ups
 """
 
 from typing import Any, Dict, List, Tuple
@@ -12,7 +12,7 @@ WHITE = (255, 255, 255)       # opencv loads file in BGR format
 YELLOW = (0, 255, 255)
 THRESHOLD = 0.1               # ignore keypoints below this threshold
 KP_left_wrist = 9             # PoseNet's skeletal keypoints
-KP_left_shoulder = 3
+KP_left_ear = 3
 
 
 def map_bbox_to_image_coords(
@@ -77,7 +77,7 @@ def draw_text(img, x, y, text_str: str, color_code):
 
 
 class Node(AbstractNode):
-   """Custom node to display keypoints and count number of hand waves
+   """Custom node to display keypoints and count number of push ups
 
    Args:
       config (:obj:`Dict[str, Any]` | :obj:`None`): Node configuration.
@@ -86,13 +86,14 @@ class Node(AbstractNode):
    def __init__(self, config: Dict[str, Any] = None, **kwargs: Any) -> None:
       super().__init__(config, node_path=__name__, **kwargs)
       # setup object working variables
-      self.left_shoulder = None
+      self.left_ear = None
       self.direction = None
       self.num_direction_changes = 0
-      self.num_waves = 0
+      self.num_pushup = 0
+      self.xcord = 0
 
    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
-      """This node draws keypoints and count hand waves.
+      """This node draws keypoints and count push ups.
 
       Args:
             inputs (dict): Dictionary with keys
@@ -128,11 +129,10 @@ class Node(AbstractNode):
     #      thickness=3,
     #   )
 
-      # hand wave detection using a simple heuristic of tracking the
-      # right wrist movement
+      # push up detection using a simple heuristic of tracking the ear
       the_keypoints = keypoints[0]              # image only has one person
       the_keypoint_scores = keypoint_scores[0]  # only one set of scores
-      left_shoulder = None
+      left_ear = None
       left_wrist = None
       
       for i, keypoints in enumerate(the_keypoints):
@@ -148,8 +148,8 @@ class Node(AbstractNode):
                left_wrist = keypoints
                the_color = YELLOW
                draw_text(img, x, y, x_y_str, the_color)
-            elif i == KP_left_shoulder:
-               left_shoulder = keypoints
+            elif i == KP_left_ear:
+               left_ear = keypoints
                the_color = YELLOW
                draw_text(img, x, y, x_y_str, the_color)
             else:                   # generic keypoint
@@ -157,36 +157,35 @@ class Node(AbstractNode):
 
             # draw_text(img, x, y, x_y_str, the_color)
 
-      if left_shoulder is not None and left_wrist is not None:
-         # only count number of hand waves after we have gotten the
-         # skeletal poses for the right wrist and right shoulder
-         if self.left_shoulder is None:
-            self.left_shoulder = left_shoulder            # first wrist data point
+      if left_ear is not None and left_wrist is not None:
+         # only count number of push ups after we have gotten the skeletal poses for the left wrist and left ear
+         if self.left_ear is None:
+            self.left_ear = left_ear            # first ear data point
          else:
-            # wait for wrist to be above shoulder to count hand wave
-            # if left_shoulder[1] > left_wrist[1]+THRESHOLD:
-            #    pass
-            # else:
-               if left_shoulder[1] < self.left_shoulder[1]:
+            # check if the x cordinates of left_ear is changed by at least -+0.03 
+            if self.xcord == 0 or (left_ear[1] >= self.xcord + 0.03 or left_ear[1] <= self.xcord - 0.03):
+               if left_ear[1] < self.left_ear[1]:
                   direction = "down"
+                  self.xcord = left_ear[1]
                else:
                   direction = "up"
 
                if self.direction is None:
                   self.direction = direction          # first direction data point
                else:
-                  # check if hand changes direction
+                  # check head changes direction
                   if direction != self.direction:
                      self.num_direction_changes += 1
-                  # every two hand direction changes == one wave
+                  # every two direction changes == one push up
                   if self.num_direction_changes >= 2:
-                     self.num_waves += 1
+                     self.num_pushup += 1
                      self.num_direction_changes = 0   # reset direction count
 
-               self.left_shoulder = left_shoulder         # save last position
+               self.left_ear = left_ear         # save last position
                self.direction = direction
+            
 
-      wave_str = f"#push-ups = {self.num_waves}"
-      draw_text(img, 20, 30, wave_str, YELLOW)
+      pushup_str = f"#push-ups = {self.num_pushup}"
+      draw_text(img, 20, 30, pushup_str, YELLOW)
 
       return {}
