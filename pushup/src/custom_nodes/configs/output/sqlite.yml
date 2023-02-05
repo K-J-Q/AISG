@@ -1,0 +1,6 @@
+# Mandatory configs
+input: ["ear_direction", "num_pushup"]
+output: ["none"]
+
+# Optional configs depending on node
+
