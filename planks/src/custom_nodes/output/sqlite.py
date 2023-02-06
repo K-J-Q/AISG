@@ -37,13 +37,33 @@ class Node(AbstractNode):
             self.logger.info(f"SQL Error: {e}")
 
     def update_db(self, is_plank:bool, time:float) -> None:
+        # now = datetime.now()
+        # dt_str = f"{now:%Y-%m-%d %H:%M:%S}"
+        # sql = """ INSERT INTO wavetable(datetime, is_plank, cumilated_time)
+        #         values (?,?, ?) """
+        # cur = self.conn.cursor()
+        # cur.execute(sql, (dt_str, is_plank, time))
+        # self.conn.commit()
+
         now = datetime.now()
         dt_str = f"{now:%Y-%m-%d %H:%M:%S}"
-        sql = """ INSERT INTO wavetable(datetime, is_plank, cumilated_time)
-                values (?,?, ?) """
+        sql = "SELECT COUNT(*) FROM wavetable;"
         cur = self.conn.cursor()
-        cur.execute(sql, (dt_str, is_plank, time))
+        cur.execute(sql)
         self.conn.commit()
+        result = cur.fetchone()
+        row_count = result[0]
+        if row_count == 1:
+            sql = "UPDATE wavetable SET `datetime` = '{}', is_plank = '{}', pushup_count = '{}';".format(dt_str, is_plank, num_pushup)
+            cur = self.conn.cursor()
+            cur.execute(sql)
+            self.conn.commit()
+        else:
+            sql = """ INSERT INTO wavetable(datetime,is_plank,pushup_count)
+                        values (?,?,?) """
+            cur = self.conn.cursor()
+            cur.execute(sql, (dt_str, is_plank, num_pushup))
+            self.conn.commit()
 
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:  # type: ignore
         plank_info = inputs["plank_info"]
