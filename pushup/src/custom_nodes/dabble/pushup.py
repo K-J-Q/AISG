@@ -9,7 +9,7 @@ from peekingduck.pipeline.nodes.abstract_node import AbstractNode
 # setup global constants
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 WHITE = (255, 255, 255)       # opencv loads file in BGR format
-YELLOW = (0, 255, 255)
+YELLOW = (255, 0, 0)
 THRESHOLD = 0.1               # ignore keypoints below this threshold
 jitter_thresh = 0.03
 KP_left_wrist = 9             # PoseNet's skeletal keypoints
@@ -49,7 +49,7 @@ def draw_text(img, x, y, text_str: str, color_code):
       text=text_str,
       org=(x, y),
       fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-      fontScale=0.4,
+      fontScale=2,
       color=color_code,
       thickness=2,
    )
@@ -134,7 +134,7 @@ class Node(AbstractNode):
             self.left_ear = left_ear            # first ear data point
          else:
             # check if the x cordinates of left_ear is changed by at least -+0.03 
-            if self.xcord == 0 or (left_ear[1] >= self.xcord + 0.03 or left_ear[1] <= self.xcord - 0.03):
+            if self.xcord == 0 or (left_ear[1] >= self.xcord + 0.3 or left_ear[1] <= self.xcord - 0.3):
                if left_ear[1] < self.left_ear[1]:
                   direction = "down"
                   self.xcord = left_ear[1]
@@ -158,10 +158,10 @@ class Node(AbstractNode):
          if self.right_ear is None:
             self.right_ear = right_ear            # first ear data point
          else:
-            if self.xcord == 0 or (right_ear[1] >= self.xcord + 0.03 or right_ear[1] <= self.xcord - 0.03):
+            if self.xcord == 0 or (right_ear[1] >= self.xcord + 0.3 or right_ear[1] <= self.xcord - 0.3):
                if right_ear[1] < self.right_ear[1]:
                   direction = "down"
-                  self.xcord = left_ear[1]
+                  self.xcord = right_ear[1]
                else:
                   direction = "up"
 
@@ -177,8 +177,8 @@ class Node(AbstractNode):
                self.right_ear = right_ear        # save last position
                self.direction = direction      
 
-      pushup_str = f"#push-ups = {self.num_pushup}"
-      draw_text(img, 20, 30, pushup_str, YELLOW)
+      pushup_str = f"#squats = {self.num_pushup}"
+      draw_text(img, 20, 80, pushup_str, YELLOW)
 
       return {
          "ear_direction": self.direction if self.direction is not None else "None",

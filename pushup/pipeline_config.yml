@@ -1,7 +1,7 @@
 nodes:
 - input.visual:
     # source: https://storage.googleapis.com/peekingduck/videos/wave.mp4
-    source: pushup.mp4
+    source: squat.mp4
 - model.posenet
 - draw.poses   
 - dabble.fps
@@ -11,4 +11,4 @@ nodes:
 - output.screen
 - custom_nodes.output.sqlite
 - output.media_writer:
-    output_dir: C:\Users\Jian Quan\AISG\pushup\save
+    output_dir: C:\AISG\pushup

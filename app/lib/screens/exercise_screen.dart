@@ -123,8 +123,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                   onLongPress: () {
                                     Provider.of<CalIntake>(context,
                                             listen: false)
-                                        .addtoBurned(double.parse(
-                                            doc['burnedCalories']));
+                                        .addtoBurned(double.parse(2.2));
                                     _deleteTask(doc.id);
                                   },
                                   child: Container(
@@ -171,8 +170,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                             padding:
                                                 const EdgeInsets.only(top: 3),
                                             child: Text(
-                                              (doc['burnedCalories'])
-                                                  .toString(),
+                                              (2.2).toString(),
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                   fontSize: 25,

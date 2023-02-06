@@ -173,11 +173,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildTimeCard(time: minutes, header: "Mins"),
-            SizedBox(
-              width: 2,
-            ),
-            buildTimeCard(time: seconds, header: "Secs"),
+            buildTimeCard(time: seconds, header: "Reps"),
           ],
         ),
         buildButtons(),
