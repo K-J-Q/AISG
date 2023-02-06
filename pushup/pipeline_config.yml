@@ -10,5 +10,5 @@ nodes:
     show: ["fps"]
 - output.screen
 - custom_nodes.output.sqlite
-# - output.media_writer:
-#     output_dir: C:\Users\hwadr\pushup\save
+- output.media_writer:
+    output_dir: C:\Users\Jian Quan\AISG\pushup\save
