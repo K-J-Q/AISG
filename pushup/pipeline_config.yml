@@ -10,5 +10,10 @@ nodes:
     show: ["fps"]
 - output.screen
 - custom_nodes.output.sqlite
+<<<<<<< HEAD
 - output.media_writer:
     output_dir: C:\AISG\pushup
+=======
+# - output.media_writer:
+#     output_dir: C:\Users\hwadr\pushup\save
+>>>>>>> parent of 531c7c2 (added push up video)
